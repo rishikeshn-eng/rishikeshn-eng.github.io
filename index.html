@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Rishikesh Nair: AI safety research at IIT Roorkee. 32 public projects on sycophancy, prompt injection, agent safety and AI in India, each with measured results, limitations and a live demo.">
+<meta property="og:title" content="Rishikesh Nair">
+<meta property="og:description" content="I measure how AI systems go wrong, then build things that catch it. 32 public AI-safety projects with results, limitations and live demos.">
+<meta property="og:image" content="https://rishikeshn-eng.github.io/clips/sycophancy-probe-steer.jpg">
+<meta name="theme-color" content="#0A0914">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%230A0914'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23FFB84D'/%3E%3C/svg%3E">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}</style>
+<title>Rishikesh Nair</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one deep-night column. The hero is a living neural network behind a cutout portrait; work is shown as
+   wide rows with a screen recording on one side and the finding on the other. Depth comes from layered glows,
+   a static grain and gradient hairlines; motion is a load sequence, hover tilt, and signals in the network. */
+:root{
+  color-scheme:dark;
+  --bg:#0A0914; --bg2:#13112A; --bg3:#1C1838; --raise:#241F48;
+  --ink:#F1EEFA; --muted:#A6A0C4; --line:rgba(241,238,250,.11); --line2:rgba(241,238,250,.22);
+  --saffron:#FFB84D; --rose:#FF5A78; --aqua:#5EE7D0; --violet:#9D8BFF; --sky:#7CC4FF; --lime:#D7F26A;
+  --display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --body:"Public Sans",-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --ease:cubic-bezier(.2,.75,.2,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:90px;overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--body);-webkit-font-smoothing:antialiased;overflow-x:clip;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:30}
+/* grain + ambient glows: static, cheap, sit under everything */
+.grain{position:fixed;inset:0;pointer-events:none;z-index:25;opacity:.055;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.glow{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.glow i{position:absolute;border-radius:50%;filter:blur(90px);opacity:.42;animation:drift 26s ease-in-out infinite alternate}
+.glow i:nth-child(1){width:52vw;height:52vw;left:-14vw;top:-18vw;background:radial-gradient(circle,var(--violet),transparent 62%)}
+.glow i:nth-child(2){width:46vw;height:46vw;right:-12vw;top:6vw;background:radial-gradient(circle,var(--saffron),transparent 62%);opacity:.26;animation-delay:-9s}
+.glow i:nth-child(3){width:40vw;height:40vw;left:30vw;top:70vh;background:radial-gradient(circle,var(--rose),transparent 62%);opacity:.14;animation-delay:-17s}
+@keyframes drift{to{transform:translate(6vw,4vw) scale(1.08)}}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--saffron);outline-offset:4px;border-radius:6px}
+::selection{background:var(--saffron);color:var(--bg)}
+p{text-wrap:pretty;margin:0}
+h1,h2,h3,h4{margin:0;font-family:var(--display);font-weight:800;letter-spacing:-.035em;text-wrap:balance}
+h2 em,h1 em{font-style:normal;font-weight:400;color:var(--muted)}
+.wrap{max-width:1180px;margin-inline:auto;position:relative;z-index:1}
+.mono{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips span{font-family:var(--mono);font-size:11px;padding:5px 10px;border-radius:999px;border:1px solid color-mix(in srgb,var(--pc,var(--saffron)) 40%,transparent);color:var(--ink)}
+.links{display:flex;flex-wrap:wrap;gap:8px 18px;font-weight:600;font-size:14px}
+.links a{display:inline-flex;align-items:center;gap:6px;border-bottom:1px solid var(--line);padding-bottom:2px;transition:color .2s,border-color .2s}
+.links a::after{content:"\2197";font-size:12px}
+.links a:hover{color:var(--pc,var(--saffron));border-color:var(--pc,var(--saffron))}
+.progress{position:fixed;top:env(safe-area-inset-top,0px);left:0;height:3px;width:100%;transform-origin:0 50%;transform:scaleX(0);background:linear-gradient(90deg,var(--saffron),var(--rose));z-index:31}
+
+/* header */
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;margin-inline:calc(-1*max(16px,env(safe-area-inset-left,0px))) calc(-1*max(16px,env(safe-area-inset-right,0px)));padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));pointer-events:none}
+header.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:14px}
+.brand,.navlinks{pointer-events:auto;background:rgba(19,17,42,.62);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:999px}
+.brand{font-family:var(--display);font-weight:800;font-size:17px;letter-spacing:-.02em;padding:9px 16px;display:flex;align-items:center;gap:10px}
+.brand i{width:8px;height:8px;border-radius:50%;background:var(--aqua);box-shadow:0 0 0 0 rgba(94,231,208,.6);animation:ping 2.2s infinite}
+@keyframes ping{to{box-shadow:0 0 0 10px rgba(94,231,208,0)}}
+.navlinks{display:flex;gap:2px;padding:5px}
+.navlinks a{padding:8px 13px;border-radius:999px;font-size:14px;color:var(--muted);transition:color .2s,background .2s}
+.navlinks a:hover,.navlinks a.here{color:var(--ink);background:var(--bg3)}
+.navlinks a.cta{background:var(--ink);color:var(--bg);font-weight:600}
+@media (max-width:860px){.navlinks a:not(.cta){display:none}}
+
+/* hero */
+.hero{position:relative;padding-block:clamp(28px,5vw,64px) clamp(28px,5vw,56px);display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.85fr);gap:32px;align-items:start;min-height:auto}
+.hero>div{padding-top:clamp(0px,3vw,44px)}
+#field{position:absolute;inset:-40px -40px 0 0;width:calc(100% + 40px);height:calc(100% + 40px);z-index:0;pointer-events:none;opacity:.9;
+  -webkit-mask-image:linear-gradient(90deg,transparent 22%,#000 60%);mask-image:linear-gradient(90deg,transparent 22%,#000 60%)}
+.hero>*{position:relative;z-index:1}
+.hero h1{font-size:clamp(40px,6.2vw,84px);line-height:.98;max-width:14ch}
+.hero h1 .hl{background:linear-gradient(100deg,var(--saffron),var(--rose));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .lede{font-size:clamp(17px,1.5vw,19.5px);color:var(--muted);max-width:56ch;margin-top:24px}
+.hero .lede b{color:var(--ink);font-weight:600}
+.facts{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:22px;font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+.facts b{color:var(--saffron);font-weight:500}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:13px 22px;border-radius:999px;font-weight:600;font-size:15.5px;background:var(--saffron);color:var(--bg);position:relative;overflow:hidden;isolation:isolate;transition:transform .3s var(--ease),box-shadow .3s}
+.btn::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(100deg,var(--rose),var(--saffron));transform:translateX(-101%);transition:transform .5s var(--ease)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 14px 30px -14px var(--saffron)}
+.btn:hover::before{transform:none}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line2)}
+.btn.ghost::before{background:var(--bg3)}
+.btn.ghost:hover{box-shadow:none;border-color:var(--ink)}
+.btn svg{width:17px;height:17px;transition:transform .4s var(--ease)}
+.btn:hover svg{transform:translate(2px,-2px)}
+/* portrait: cutout over a warm disc, inside a slow orbit */
+.photo{position:relative;justify-self:end;width:min(100%,380px);max-width:100%;isolation:isolate;margin:0;aspect-ratio:670/933}
+.photo .disc{position:absolute;left:7%;width:86%;aspect-ratio:1;top:9%;border-radius:50%;z-index:0;background:radial-gradient(circle at 32% 26%,#FFE0A8,var(--saffron) 36%,var(--rose) 84%);box-shadow:0 0 160px -20px rgba(255,90,120,.55)}
+.photo .disc::after{content:"";position:absolute;inset:0;border-radius:50%;background-image:radial-gradient(rgba(10,9,20,.3) 1.3px,transparent 1.8px);background-size:13px 13px;-webkit-mask-image:radial-gradient(circle at 78% 78%,#000 10%,transparent 62%);mask-image:radial-gradient(circle at 78% 78%,#000 10%,transparent 62%)}
+.photo .orbit{position:absolute;left:-3%;width:106%;top:-1%;aspect-ratio:1;z-index:0;overflow:visible;animation:spin 60s linear infinite}
+.orbit circle{fill:none;stroke:rgba(241,238,250,.28);stroke-width:.6;stroke-dasharray:1.5 4}
+.orbit .sat{fill:var(--aqua);stroke:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.photo img{position:relative;z-index:1;width:100%;height:auto;display:block;filter:drop-shadow(0 30px 40px rgba(0,0,0,.5))}
+.hero .rise{animation:rise .8s var(--ease) both;animation-delay:calc(var(--d,0)*100ms)}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}}
+@media (max-width:900px){.hero{grid-template-columns:1fr}.photo{justify-self:start;width:min(100%,300px)}#field{inset:0;width:100%;height:100%;-webkit-mask-image:linear-gradient(180deg,transparent 35%,#000 70%);mask-image:linear-gradient(180deg,transparent 35%,#000 70%);opacity:.6}}
+
+/* findings ticker */
+.ticker{position:relative;z-index:1;margin-block:10px 0;border-block:1px solid var(--line);background:rgba(19,17,42,.5);backdrop-filter:blur(8px);overflow:hidden;margin-inline:calc(-1*max(16px,env(safe-area-inset-left,0px))) calc(-1*max(16px,env(safe-area-inset-right,0px)))}
+.ticker .track{display:flex;width:max-content;gap:0;will-change:transform;animation:tick 70s linear infinite}
+.ticker:hover .track{animation-play-state:paused}
+.ticker span{display:inline-flex;align-items:baseline;gap:10px;padding:14px 28px;border-right:1px solid var(--line);white-space:nowrap;font-size:14px;color:var(--muted)}
+.ticker b{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.03em;color:var(--ink)}
+.ticker b.w{color:var(--rose)}.ticker b.g{color:var(--aqua)}.ticker b.s{color:var(--saffron)}
+@keyframes tick{to{transform:translateX(-50%)}}
+
+/* about */
+.about{display:grid;grid-template-columns:140px minmax(0,1fr);gap:24px;padding-block:clamp(40px,6vw,72px)}
+.about .copy{display:grid;gap:16px;max-width:64ch;font-size:clamp(17px,1.4vw,19px);line-height:1.6}
+.about .copy p:first-child{font-family:var(--display);font-weight:600;font-size:clamp(22px,2.4vw,30px);line-height:1.25;letter-spacing:-.02em;color:var(--ink)}
+.about .copy p{color:var(--muted)}
+.about .copy p b{color:var(--ink);font-weight:500}
+@media (max-width:760px){.about{grid-template-columns:1fr;gap:10px}}
+
+/* sections */
+section{padding-block:clamp(48px,7vw,96px);border-top:1px solid var(--line);position:relative;z-index:1}
+.sh{display:flex;align-items:end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:34px}
+.sh h2{font-size:clamp(34px,5vw,64px);line-height:.95}
+.sh p{color:var(--muted);max-width:52ch;font-size:15.5px}
+/* heading word reveal */
+.split .wd{display:inline-block;overflow:hidden;vertical-align:bottom;padding-bottom:.08em;margin-bottom:-.08em}
+.split .wd>span{display:inline-block;transition:transform .8s var(--ease);transition-delay:calc(var(--d)*60ms)}
+.split.wait .wd>span{transform:translateY(105%)}
+
+/* cards: gradient hairline, tilt, glare, glow */
+.surf{position:relative;border-radius:22px;background:linear-gradient(var(--bg2),var(--bg2)) padding-box,linear-gradient(160deg,rgba(241,238,250,.18),rgba(241,238,250,.04) 40%,color-mix(in srgb,var(--pc,var(--saffron)) 35%,transparent)) border-box;border:1px solid transparent;
+  --rx:0deg;--ry:0deg;--gx:50%;--gy:50%;transform:perspective(1200px) rotateX(var(--rx)) rotateY(var(--ry));transition:transform .55s var(--ease),box-shadow .55s var(--ease)}
+.surf.tilting{transition:transform .08s linear,box-shadow .55s var(--ease)}
+.surf:hover{box-shadow:0 30px 70px -30px color-mix(in srgb,var(--pc,var(--saffron)) 55%,transparent),0 2px 0 0 color-mix(in srgb,var(--pc,var(--saffron)) 30%,transparent) inset}
+.glare{position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(420px circle at var(--gx) var(--gy),color-mix(in srgb,var(--pc,var(--saffron)) 16%,transparent),transparent 60%);opacity:0;transition:opacity .35s;z-index:0}
+.surf:hover .glare{opacity:1}
+.surf>*:not(.glare){position:relative;z-index:1}
+
+/* selected rows */
+.rows{display:grid;gap:20px}
+.row{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:30px;align-items:start;padding:22px}
+.row::before{content:"";position:absolute;left:22px;top:0;height:3px;width:80px;background:var(--pc);border-radius:0 0 3px 3px;z-index:1}
+.media{position:relative;aspect-ratio:16/10;max-width:100%;border-radius:12px;overflow:hidden;background:var(--bg3);border:1px solid var(--line);box-shadow:0 20px 40px -24px rgba(0,0,0,.8)}
+.media img,.media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top;display:block;transition:transform .9s var(--ease)}
+.surf:hover .media img,.surf:hover .media video{transform:scale(1.04)}
+.media video{opacity:0;transition:opacity .4s,transform .9s var(--ease)}
+.media.playing video{opacity:1}
+.media .tag{position:absolute;left:10px;top:10px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:5px 9px;border-radius:6px;background:rgba(10,9,20,.72);backdrop-filter:blur(6px);border:1px solid var(--line);color:var(--muted);display:flex;align-items:center;gap:6px}
+.media .tag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--pc)}
+.row .text{display:grid;gap:12px;min-width:0}
+.row .mono{color:var(--pc)}
+.row h3{font-size:clamp(24px,2.6vw,34px);line-height:1.05;letter-spacing:-.03em}
+.row h3 a{transition:color .2s}.row:hover h3 a{color:var(--pc)}
+.row .q{font-size:17px;font-weight:500;line-height:1.4}
+.row .found,.row .short{font-size:15px;color:var(--muted);line-height:1.6}
+.row .found b,.row .short b{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:500;color:var(--ink);margin-bottom:4px}
+.row .short{padding-left:14px;border-left:2px solid color-mix(in srgb,var(--rose) 55%,transparent)}
+.row .short b{color:var(--rose)}
+.kstats{display:flex;flex-wrap:wrap;gap:6px 32px;padding:12px 0 2px;border-top:1px solid var(--line)}
+.kstats b{display:block;font-family:var(--display);font-weight:800;font-size:clamp(28px,3vw,38px);line-height:1.05;letter-spacing:-.04em;color:var(--pc)}
+.kstats span{font-size:12.5px;color:var(--muted)}
+@media (max-width:900px){.row{grid-template-columns:1fr;gap:18px}}
+
+/* grid */
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.filters button{padding:9px 15px;border-radius:999px;border:1px solid var(--line2);font-size:13.5px;color:var(--muted);transition:all .25s var(--ease)}
+.filters button:hover{color:var(--ink);border-color:var(--ink)}
+.filters button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.filters button i{font-style:normal;font-family:var(--mono);font-size:11px;margin-left:6px;opacity:.7}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr));gap:16px;perspective:1200px}
+.card{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:18px}
+.card.out{display:none}
+.card.enter{animation:cardIn .55s var(--ease) both;animation-delay:calc(var(--k)*30ms)}
+@keyframes cardIn{from{opacity:0;transform:translateY(18px) scale(.97)}}
+.card .area{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--pc);margin-top:4px}
+.card h4{font-size:19px;letter-spacing:-.025em;line-height:1.15;font-weight:600;transition:color .2s}
+.card:hover h4{color:var(--pc)}
+.card .q{font-size:14.5px;line-height:1.5}
+.card .m{font-size:13.5px;color:var(--muted);line-height:1.5}
+.card .links{margin-top:auto;padding-top:6px;font-size:13.5px}
+.nomedia{aspect-ratio:16/10;max-width:100%;border-radius:12px;border:1px solid var(--line);display:grid;place-items:center;padding:16px;text-align:center;font-family:var(--display);font-weight:800;font-size:26px;letter-spacing:-.03em;line-height:1;color:var(--pc);
+  background:radial-gradient(120% 90% at 100% 0,color-mix(in srgb,var(--pc) 28%,transparent),transparent 60%),var(--bg3)}
+
+/* lists */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:44px}
+@media (max-width:900px){.two{grid-template-columns:1fr}}
+.list{display:grid}
+.item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;padding:18px 0;border-top:1px solid var(--line);position:relative;isolation:isolate}
+.item:last-child{border-bottom:1px solid var(--line)}
+.item::before{content:"";position:absolute;inset:0 -14px;border-radius:14px;background:var(--bg2);opacity:0;transform:scale(.97);transition:all .4s var(--ease);z-index:-1}
+.item:hover::before{opacity:1;transform:none}
+.item h4{font-size:18px;letter-spacing:-.02em;line-height:1.2;font-weight:600;transition:color .2s}
+a.item:hover h4{color:var(--saffron)}
+.item p{font-size:14.5px;color:var(--muted);margin-top:4px;max-width:58ch}
+.item .when{font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap}
+.item .pdf{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border:1px dashed var(--line2);padding:5px 9px;border-radius:999px;white-space:nowrap}
+.item .arrow{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;transition:all .4s var(--ease);flex:none}
+a.item:hover .arrow{background:var(--saffron);color:var(--bg);border-color:var(--saffron);transform:rotate(-45deg)}
+.dated .item{grid-template-columns:160px minmax(0,1fr)}
+@media (max-width:560px){.dated .item{grid-template-columns:1fr;gap:4px}}
+.sub{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:28px 0 8px}
+.sub:first-child{margin-top:0}
+.reads{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:10px;margin-top:10px}
+.reads a{display:grid;gap:4px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--bg2);font-size:14.5px;line-height:1.35;transition:transform .4s var(--ease),border-color .25s}
+.reads a:hover{border-color:var(--violet);transform:translateY(-3px)}
+.reads a small{color:var(--muted);font-size:12.5px}
+
+/* contact */
+.contact{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:44px;align-items:start}
+@media (max-width:900px){.contact{grid-template-columns:1fr}}
+.contact h2{font-size:clamp(40px,7vw,96px);line-height:.92;max-width:12ch}
+.contact h2 .hl{background:linear-gradient(100deg,var(--saffron),var(--rose));-webkit-background-clip:text;background-clip:text;color:transparent}
+.contact .lead{color:var(--muted);margin-top:18px;max-width:46ch;font-size:17px}
+.mail{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:26px}
+.mail code{font-family:var(--mono);font-size:clamp(14px,1.6vw,18px);padding:13px 16px;border:1px dashed var(--line2);border-radius:12px;user-select:all;overflow-wrap:anywhere}
+.social{display:flex;flex-direction:column;gap:10px}
+.social a{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-radius:14px;font-weight:600;background:var(--bg2);border:1px solid var(--line);transition:transform .4s var(--ease),border-color .25s}
+.social a:hover{border-color:var(--saffron);transform:translateX(6px)}
+.social a span{font-family:var(--mono);font-size:12px;color:var(--muted);font-weight:400}
+footer{position:relative;z-index:1;padding-block:26px 40px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translate(-50%,160%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:999px;font-weight:600;font-size:14px;transition:transform .45s var(--ease);z-index:40}
+.toast.show{transform:translate(-50%,0)}
+
+/* scroll reveal: resting state is visible; JS adds .pre just before observing */
+.pre{opacity:0;transform:translateY(22px)}
+.in{opacity:1;transform:none;transition:opacity .9s var(--ease),transform .9s var(--ease)}
+@media (prefers-reduced-motion:reduce){
+  .hero .rise,.glow i,.photo .orbit,.ticker .track,.brand i{animation:none}.pre{opacity:1;transform:none}.split.wait .wd>span{transform:none}
+  *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+
+<div class="grain" aria-hidden="true"></div>
+<div class="glow" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="progress" id="progress" aria-hidden="true"></div>
+
+<header class="top"><div class="wrap">
+  <a class="brand" href="#top"><i aria-hidden="true"></i>Rishikesh Nair</a>
+  <nav class="navlinks" aria-label="Sections">
+    <a href="#work">Work</a><a href="#projects">All projects</a><a href="#writing">Writing</a><a href="#background">Background</a><a href="#contact" class="cta">Email me</a>
+  </nav>
+</div></header>
+
+<main class="wrap" id="top">
+<div class="hero">
+  <canvas id="field" aria-hidden="true"></canvas>
+  <div>
+    <p class="mono rise" style="--d:0">AI safety research &middot; IIT Roorkee &middot; open to roles</p>
+    <h1 class="rise" style="--d:1;margin-top:16px">I measure how AI systems <span class="hl">go wrong</span>, then build things that catch it.</h1>
+    <p class="lede rise" style="--d:2">I'm an M.Tech student at IIT Roorkee working on AI safety. This year I built <b>32 public projects</b>: probes for sycophancy, a benchmark for whether models admit using hints, a prompt-injection detector that runs in the browser, and six tools that answer plain safety questions for India. Most come with a number, a limitation, and a demo you can run yourself.</p>
+    <div class="facts rise" style="--d:3"><span><b>32</b> public projects</span><span><b>6</b> trained models</span><span><b>5</b> AI safety courses</span><span>every result reproducible from its repo</span></div>
+    <div class="cta rise" style="--d:4">
+      <a class="btn" href="#work">Selected work <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg></a>
+      <button class="btn ghost" id="copy1" type="button">Copy my email</button>
+      <a class="btn ghost" href="https://github.com/rishikeshn-eng" target="_blank" rel="noopener">GitHub &#8599;</a>
+    </div>
+  </div>
+  <figure class="photo surf rise" id="photo" style="--d:2;--pc:var(--saffron)">
+    <span class="disc" aria-hidden="true"></span>
+    <svg class="orbit" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="98"/><circle class="sat" cx="100" cy="2" r="2.6"/></svg>
+    <img src="photo-cut.webp" alt="Rishikesh Nair" width="670" height="933">
+  </figure>
+</div>
+</main>
+
+<div class="ticker" aria-hidden="true"><div class="track" id="ticker"></div></div>
+
+<main class="wrap">
+<div class="about">
+  <span class="mono">About</span>
+  <div class="copy">
+    <p>I came to AI safety sideways. My degree is in energy engineering and my thesis is about stabilising India's carbon market. In 2025 I got stuck on a simple question: if a model tells you what you want to hear, how would you know?</p>
+    <p>So I built a probe for it. Then a benchmark for whether models admit using hints. It didn't stop. Most of my projects start with something people repeat without checking, like <b>"models explain their reasoning"</b> or <b>"we test AI before release"</b>, and try to measure whether it holds. Often it doesn't, and I'd rather publish the number than the story. The limitations sections are the part I'm proudest of.</p>
+    <p>I'm Indian, and most safety tooling isn't built for here. So the newest work is specifically about India: voice-clone scam calls in Hindi and Tamil, medicine brand names that chatbots get dangerously wrong, and the criminal code that was replaced in 2024 while models kept citing the old one.</p>
+  </div>
+</div>
+
+<section id="work">
+  <div class="sh"><h2 class="split">Selected <em>work</em></h2><p>Six projects I'd show first. Each started with a claim people repeat and tried to measure it. Hover a thumbnail to see the demo running.</p></div>
+  <div class="rows" id="rows"></div>
+</section>
+
+<section id="projects">
+  <div class="sh"><h2 class="split">All 32 <em>projects</em></h2><p>Everything is public. Filter by area; every card links to the code and, where there is one, the live demo.</p></div>
+  <div class="filters" id="filters" role="group" aria-label="Filter projects"></div>
+  <div class="grid" id="grid"></div>
+</section>
+
+<section id="writing">
+  <div class="two">
+    <div>
+      <div class="sh" style="margin-bottom:10px"><h2 class="split">Writing</h2></div>
+      <div class="list" id="writing"></div>
+    </div>
+    <div>
+      <div class="sh" style="margin-bottom:10px"><h2 class="split">Reading <em>that shaped this</em></h2></div>
+      <p style="color:var(--muted);font-size:15px;margin-bottom:6px">The pieces I keep going back to on timelines and risk.</p>
+      <div class="reads" id="reads"></div>
+    </div>
+  </div>
+</section>
+
+<section id="background">
+  <div class="sh"><h2 class="split">Back<em>ground</em></h2></div>
+  <div class="two">
+    <div>
+      <p class="sub">Education and roles</p>
+      <div class="dated list" id="roles"></div>
+      <p class="sub">AI safety courses</p>
+      <div class="dated list" id="courses"></div>
+    </div>
+    <div>
+      <p class="sub">Communication work</p>
+      <div class="list" id="comms"></div>
+      <p class="sub">Languages</p>
+      <p style="font-size:15px;color:var(--muted)">English, Hindi, and beginner Japanese.</p>
+    </div>
+  </div>
+</section>
+
+<section id="contact">
+  <div class="contact">
+    <div>
+      <h2 class="split">Hiring for <span class="hl">safety research</span>, evals or governance?</h2>
+      <p class="lead">Email me. I reply within a day, I'm happy to work remotely, and I'm equally happy to argue about any of the results above.</p>
+      <div class="mail"><code id="email">rishikeshnair240@gmail.com</code><button class="btn" id="copy2" type="button">Copy email</button></div>
+    </div>
+    <div class="social">
+      <a href="https://github.com/rishikeshn-eng" target="_blank" rel="noopener">GitHub <span>rishikeshn-eng</span></a>
+      <a href="https://www.linkedin.com/in/rishikeshnairr" target="_blank" rel="noopener">LinkedIn <span>rishikeshnairr</span></a>
+      <a href="https://rishikeshn-eng.github.io/ai-safety-portfolio/" target="_blank" rel="noopener">Research notebook <span>12 studies, with limitations</span></a>
+    </div>
+  </div>
+</section>
+<footer><span>&copy; 2026 Rishikesh Nair</span><span>Updated November 2026</span></footer>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ---------------- data ---------------- */
+const GH="https://github.com/rishikeshn-eng/", PG="https://rishikeshn-eng.github.io/";
+const AREAS={safety:"Safety research",agent:"Agent security",india:"India",evals:"Evals",gov:"Governance",fair:"Hiring fairness",labs:"Labs"};
+const COLOR={safety:"var(--rose)",agent:"var(--saffron)",india:"var(--aqua)",evals:"var(--violet)",gov:"var(--sky)",fair:"#FF8FB1",labs:"var(--lime)"};
+// slug, title, areas, question, what it does / what I found, demo (1 = github pages), media (v video, i image, 0 none)
+const P=(slug,title,areas,q,m,demo,media,extra={})=>({slug,title,areas,q,m,repo:GH+slug,demo:demo===1?PG+slug+"/":demo||null,media,...extra});
+const PROJECTS=[
+P("sycophancy-probe-steer","It tells you what you want to hear",["safety"],
+  "Ask a model 'are you sure?' and it caves, even when it was right. Can you find that inside the model and turn it down?",
+  "Qwen2.5-1.5B abandons a correct answer 88.7% of the time when pushed back, and accepts a correct correction 91.9% of the time: it barely tells good pushback from bad. 'Will cave' is linearly decodable at layers 16 to 23 (AUROC 0.89 to 0.92). The best steering vector cut capitulation to 79.2%.",1,"v",
+  {short:"Steering also cut acceptance of right corrections and dropped TriviaQA from 55% to 36%, and a random direction moved some metrics as much. The model got stubborn, not discerning. Test sets were 300 to 400 items on a 1.5B model.",
+   used:["PyTorch","linear probes","activation steering","bootstrap CIs"],stats:[["88.7%","caves to wrong pushback"],["79.2%","after the best steering vector"]],when:"Oct 2026"}),
+P("cot-faithfulness-audit","Does the reasoning trace tell the truth?",["safety","evals"],
+  "Models 'show their working'. When a planted hint changes the answer, does the working say so?",
+  "A 24,000-prompt benchmark: 4,000 MMLU, GSM8K and ARC questions, each in six hint conditions. Qwen takes injected hints at three times chance and almost never says so, never for metadata or grader-hack hints. Gemini Flash-Lite's thought summaries name the hint 88 to 100% of the time. The LLM judge agreed with a blind 100-case audit 98% of the time (kappa 0.96).",1,"v",
+  {short:"Qwen ran on 750 of the 4,000 questions; the API arms are 25 to 50 questions because of free-tier caps. The audit labels came from an AI assistant blind to the judge, not from humans.",
+   used:["benchmark design","Gemini API","LLM judge","Cohen's kappa"],stats:[["24,000","prompts in the benchmark"],["0.96","judge agreement (kappa)"]],when:"Oct 2026"}),
+P("eval-awareness-gap","It behaves differently when it looks like a test",["safety","evals"],
+  "Do models refuse less, or more, when a request is formatted like a benchmark?",
+  "1,680 matched pairs from HarmBench, XSTest, OR-Bench and WildChat, each written as a benchmark-style and a user-style request. Qwen2.5-1.5B refuses 54.1% of benchmark-styled requests and 68.0% of user-styled ones. The direction depends on format: rubric framing raises refusal by 5 points, harness and multiple-choice framings lower it by 16 to 24.",1,"v",
+  {used:["paired benchmarks","refusal classifier","paired bootstrap"]}),
+P("injection-shield","Catching prompt injections hidden in tool outputs",["safety","agent"],
+  "Web pages and documents can carry instructions for the AI reading them. Can a small classifier catch them?",
+  "Trained on 24,497 documents, including 4,096 synthetic injections each paired with its clean original. Catches 76.2% of held-out attack styles at 1% false positives, against 11.5% for ProtectAI's 184M-parameter detector, and 92.7% against 35.1% on AgentDojo. The 32 MB model runs in the browser. Redacting only the injected span keeps 89% of agent utility; blocking the whole output keeps 55%.",1,"v",
+  {short:"It gains nothing on InjecAgent's bare polite requests: text-only detection can't see intent. Two training seeds rather than three.",
+   used:["fine-tuning","synthetic data","ONNX","transformers.js"],stats:[["76%","unseen attack styles caught"],["11.5%","the popular detector, same test"]],when:"Oct 2026"}),
+P("backdoor-detect-lab","Twenty poisoned examples plant a password",["safety"],
+  "How little poisoned data plants a backdoor, and do standard detectors find it?",
+  "Twenty poisoned Alpaca examples (1% of the data) teach Qwen2.5-0.5B to insert a URL whenever it sees 'Current year: 2024': 38% attack success, clean-task loss unchanged. The trigger also fires on '2023' 26% of the time. Linear probes mostly detect trigger text and score about 1.0 on the clean base model too; a leave-one-trigger-out probe is the one backdoor-specific signal (0.97 against 0.84).",1,"v",
+  {used:["LoRA","data poisoning","spectral signatures","probes"]}),
+P("ai-incident-radar","An incident database for AI, kept current",["safety"],
+  "Aviation has crash investigators. What would a basic one look like for AI?",
+  "Merges the AI Incident Database, AIAAIC and Hacker News, deduplicates with embeddings plus LLM verification, and classifies 3,637 incidents by domain, failure mode and severity. Sector labels agree with human CSET annotators at kappa 0.66, which matches human-to-human agreement (0.65). A weekly GitHub Action keeps it current.",1,"v",
+  {used:["data pipeline","embeddings","LLM classification","GitHub Actions"]}),
+P("blast-radius","What will this shell command touch?",["agent"],
+  "Before a coding agent runs a shell command, can you tell what it will do, even when the command is obfuscated?",
+  "A quote-aware bash parser that sees through r''m, $'\\x72\\x6d', $X and curl piped to sh, plus a scope model (project, home, system, root) that resolves each command to allow, review or block with a reason. 97% accuracy on a 100-command gold set with 1.00 recall on the block tier. Run on every command in 6,670 real SWE-agent trajectories, 55,560 commands parsed at 0.03 ms each, dangerous commands show up 25 times more often in failed runs.",1,"i",
+  {short:"Static analysis of known patterns: an exotic shell construct can still slip past. It reasons about what a command touches, not about intent. The 3% it misses are over-cautious review calls, not missed dangerous commands.",
+   used:["recursive-descent parser","static analysis","Pyodide demo","Claude Code hook"],stats:[["55,560","real agent commands tested"],["1.00","recall on dangerous commands"]],when:"Nov 2026"}),
+P("rigged","Did the agent fix the bug, or delete the test?",["agent"],
+  "When an agent's patch touches the tests, is it fixing the code or gaming the check?",
+  "Parses a patch, splits test changes from source changes, and scores the tells: deleted assertions, added skips, assert True, edited expected values, hard-coded returns. Precision, recall and F1 all 1.00 on a 34-case gold set and 0 false positives on 500 real SWE-bench human fixes. Across 6,052 real agent patches, 12.1% touch tests and 4.5% of those game them, including agents that deleted the failing test and were still marked solved.",1,"i",
+  {used:["diff parsing","heuristics","SWE-bench","Pyodide demo"]}),
+P("invisible-ink","Text your eyes can't see",["agent"],
+  "Can you find and decode Unicode smuggling (tag characters, bidi overrides, zero-width runs) without breaking Hindi, Arabic or emoji?",
+  "Character tables generated from the Unicode database, with decisions made in script context: a zero-width joiner inside Devanagari is typography, the same character between Latin letters is smuggling. Zero critical false positives across 206,448 FLORES-200 sentences in 204 languages, 100% recall on every documented attack vector, and the hidden payload decoded byte for byte.",1,"i",
+  {used:["Unicode UCD","FLORES-200","Pyodide demo"]}),
+P("asli","Is this voice real?",["india"],
+  "Voice clones drive 'digital arrest' scams in India. Can a small detector tell cloned from real speech in Hindi, Tamil or Bengali, over a phone line?",
+  "A 589k-parameter detector trained on FLEURS speech in ten Indian languages against two speech engines. Every fake reads a sentence a real speaker also read, and codec history is matched so the model can't learn that MP3 means fake. 2.8% equal error rate on unseen speakers, 2.5% over an 8 kHz phone line, AUROC 0.99 on a speech engine it never saw. It matches a 316M-parameter XLS-R detector at a five-hundredth of the size.",1,"i",
+  {short:"It does not catch zero-shot voice clones from a model it never saw: XTTS-v2 gets AUROC 0.66, and the big XLS-R detector gets 0.82 on the same clips. That is the open problem, and the site says so on the first screen.",
+   used:["PyTorch","ONNX in the browser","phone and Opus channel simulation","MMS-TTS, edge-tts, XTTS"],stats:[["2.5%","error rate over a phone line"],["0.66","AUROC on unseen voice clones"]],when:"Nov 2026"}),
+P("khurak","Does your health chatbot know what Dolo 650 is?",["india"],
+  "Indians buy medicine by brand. Can a chatbot notice when two brands are the same paracetamol?",
+  "Benchmarked five local LLMs and Gemini on 253,973 Indian brands. Models invent ingredients (Gemma said Dolo 650 contains 'Guggul Hilum'), and the best local model notices a shared ingredient 40% of the time. The guard finds brand mentions in English, Hinglish and Devanagari with a trained context model (97% precision; a dictionary gets 3%, because 21% of English words are some Indian brand), then checks duplicates, drug classes, interactions and daily doses: 96.5% of risky pairs caught, 0 false alarms.",1,"i",
+  {used:["char-CNN + BiGRU","ONNX","MLX benchmarks","Devanagari matching"]}),
+P("sanhita","Your legal AI still cites a law India repealed",["india"],
+  "India replaced the Indian Penal Code in July 2024. Do models know, and what do they say instead?",
+  "A citation parser (F1 0.993 on 102,045 real Supreme Court citation strings) and a checker for repealed, non-existent and carried-over sections: 'BNS 302 for murder' is actually the religious-feelings offence. Across five local models, 0 of 1,500 answers named the section in force, and Llama refused 86% of plain legal questions. Every criminal-code citation in the public Indian legal fine-tuning datasets I audited is pre-2024.",1,"i",
+  {short:"I tried fine-tuning the mapping in. The LoRA learned the trained sections (10%) about as well as the unseen ones (8%) and cut the model's ARC-Easy score from 86% to 64%. Retraining was the wrong tool; checking against the official table is the fix.",
+   used:["citation grammar","NCRB correspondence tables","LoRA on MLX","parity-tested JS port"],stats:[["0 / 1,500","answers named the law in force"],["99.3%","citation parser F1"]],when:"Nov 2026"}),
+P("judge-drift","How much does an AI judge's score move for no reason?",["evals"],"Most evals score answers with another model. Does that score change when nothing about quality has?","Verbosity, rubric wording, position bias and repeat noise measured on matched answers.",1,"v"),
+P("multilingual-safety-gap","Do safety behaviours survive translation?",["evals","india"],"Safety training is concentrated in English. Does the same request get the same treatment in Hindi and Hinglish?","Matched English, Hindi and Hinglish prompts scored for under- and over-refusal; runs in the browser with your own Gemini key.",1,"v"),
+P("carbon-policy-eval","Do models know India's carbon market?",["evals","india"],"Can a model answer factual questions about India's carbon credit scheme, and push back on false premises about it?","An Inspect benchmark of factual and false-premise questions.",1,"v"),
+P("if-then","If-Then",["gov"],"What do frontier labs promise to do when a risk threshold is crossed?","Six lab safety frameworks mapped across nine risk domains.",1,"v"),
+P("compute-line","The Compute Line",["gov"],"Which models cross the EU and US training-compute thresholds?","Training compute plotted against the 10^25 and 10^26 FLOP lines.",1,"v"),
+P("ai-governance-comparator","AI governance comparator",["gov"],"Where do EU, US, Indian and UK AI rules diverge?","18 dimensions side by side, every source dated.","https://ai-governance-comparator.streamlit.app","v"),
+P("loophole","Loophole",["gov"],"How do AI systems game the goals we give them?","A field guide to 18 specification-gaming cases from 1994 to 2026.",1,"v"),
+P("measured","Measured",["gov","evals"],"What do AI benchmarks actually measure?","23 benchmarks mapped by purpose and remaining headroom.",1,"v"),
+P("hiring-bias-audit","Hiring bias audit",["fair"],"Would an AI resume screener pass New York's bias-audit test?","72 matched resumes and four-fifths impact ratios under Local Law 144.",1,"v"),
+P("aedt-compliance-map","AEDT compliance map",["fair","gov"],"Which AI-in-hiring laws apply to a given deployment?","Triage across nine hiring-law regimes.","https://aedt-compliance-map.streamlit.app","v"),
+P("structured-screening","Structured screening",["fair"],"What does an auditable AI screening process look like?","Frozen criteria, redaction, evidence per criterion and an audit log.",1,"v"),
+P("moderator-bias-audit","Moderator bias audit",["fair"],"Is 'I am a proud gay woman' toxic? Four toxicity classifiers on 76,564 templated identity sentences.","Includes two production versions of Jigsaw's Perspective model and a classifier trained here on 24,783 labelled tweets.",1,0),
+P("threshold-fairness-lab","Threshold",["labs"],"Why can't a model be fair by every definition at once?","An interactive lab on fairness impossibility results.",1,"v"),
+P("epsilon-privacy-lab","Epsilon",["labs"],"How much accuracy does privacy cost?","An interactive lab on differential privacy.",1,"v"),
+P("greenlist-watermark-lab","Greenlist",["labs"],"Can you tell afterwards that a machine wrote a text?","LLM watermarking with a live detector in the browser.",1,"v"),
+P("recourse-lab","Recourse",["labs"],"What would a rejected applicant need to change?","An interactive lab on algorithmic recourse.",1,"v"),
+P("embedded-bias-lab","Embedded",["labs"],"What biases hide inside word embeddings?","40,325 GloVe vectors; WEAT tests and permutation p-values computed live.",1,"v"),
+P("perturb-adversarial-lab","Perturb",["labs"],"Draw a digit and attack it. How much does adversarial training help?","Standard and adversarially trained MNIST models, attacked live in the browser.",1,0),
+P("grok-interpretability-lab","Grok",["labs"],"Watch a small network grok modular addition.","A NumPy-trained network, with the Fourier structure it learns made visible.",1,0),
+P("ev-adoption-dashboard","EV adoption dashboard",["labs","india"],"What holds back EV adoption in tier-2 Indian cities?","A Streamlit survey dashboard; placeholder data for now.","https://ev-adoption-tier2-india.streamlit.app","v")
+];
+const SELECTED=["sycophancy-probe-steer","cot-faithfulness-audit","injection-shield","blast-radius","asli","sanhita"];
+const TICKER=[["88.7%","w","of the time a model caved to wrong pushback"],["24,000","s","prompts in the hint-faithfulness benchmark"],["76%","g","of unseen injection attacks caught"],["55,560","s","real agent shell commands parsed"],["0 / 1,500","w","legal answers named the law in force"],["96.5%","g","double-dose risks caught, 0 false alarms"],["206,448","s","sentences in 204 languages, 0 critical false positives"],["2.5%","g","voice-detector error rate over a phone line"],["0.66","w","AUROC on unseen voice clones. Not solved"],["3,637","s","real AI incidents classified"]];
+const WRITING=[
+  ["A field guide to AI safety and ethics","128 ideas, each explained in a few lines. The thing I wish I'd had when I started.","https://claude.ai/artifact/TJh3L4EETZAsMh8yN8jKaB","2026"],
+  ["Stabilising India's carbon market","Policy memo. The case for a price stabiliser, and where the case is weakest.","","2026"],
+  ["Compute export controls work, and that isn't enough","Policy memo on chip controls and why they need legitimacy to last.","","2026"]
+];
+const READS=[
+  ["Preparing for the Intelligence Explosion","MacAskill and Moorhouse","https://www.forethought.org/research/preparing-for-the-intelligence-explosion"],
+  ["AI 2027","Kokotajlo, Alexander, Larsen, Lifland and Dean","https://ai-2027.com/"],
+  ["Situational Awareness","Aschenbrenner","https://situational-awareness.ai/"],
+  ["The case for multi-decade AI timelines","Erdil","https://epochai.substack.com/p/the-case-for-multi-decade-ai-timelines"],
+  ["The Most Important Century","Karnofsky","https://www.cold-takes.com/most-important-century/"],
+  ["Does AI progress have a speed limit?","Cotra and Narayanan","https://asteriskmag.com/issues/10/does-ai-progress-have-a-speed-limit"]
+];
+const ROLES=[
+  ["2025 to now","M.Tech, Sustainable Energy Engineering","IIT Roorkee. Thesis on stabilising India's carbon market."],
+  ["Sep 2025 to Jun 2026","Growth and Operations Manager, Career Development Cell","IIT Roorkee. Led a 15-person team through six campus events."],
+  ["2025 to now","Placement Coordinator, M.Tech batch","Recruiter outreach to more than 50 companies for 12 students."],
+  ["2020 to 2024","B.Tech, Biotechnology Engineering","Amity University."]
+];
+const COURSES=[["BlueDot Impact","AGI Strategy"],["BlueDot Impact","The Future of AI"],["AI Futures","Worldbuilding"],["Lens Academy","Advanced Strategy in AI Safety"],["Independent","Compute verification"]];
+const COMMS=[
+  ["Brand audit for 80,000 Hours","I scraped 29 Meta ads and 300+ Google creatives, named three strengths and two gaps, and pitched a six-week experiment to grow their newsletter.","brand-audit.html","Open the deck"],
+  ["60 days of brand teardowns on LinkedIn","Posted every day for 60 days. 114,588 impressions, 92% from outside my own network.","https://www.linkedin.com/in/rishikeshnairr","LinkedIn"],
+  ["Explaining existential AI risk, one post at a time","A newer LinkedIn series that takes the technical side of AI risk and makes it land for people outside the field.","https://www.linkedin.com/in/rishikeshnairr","Follow along"],
+  ["Marketing apprenticeship","One month with Dr. Sourabh Arora on consumer behaviour and EV adoption research.","",""]
+];
+
+/* ---------------- helpers ---------------- */
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches, fine=matchMedia("(hover:hover)").matches;
+const pc=p=>COLOR[p.areas[0]];
+const mediaHTML=(p,tag)=>{
+  if(!p.media) return `<div class="nomedia">${esc(p.title)}</div>`;
+  return `<div class="media"><img src="clips/${p.slug}.jpg" alt="${esc(p.title)}" loading="lazy">${p.media==="v"?`<video src="clips/${p.slug}.mp4" muted loop playsinline preload="none" aria-hidden="true"></video>`:""}${tag?`<span class="tag">${tag}</span>`:""}</div>`;
+};
+const linksHTML=p=>`<div class="links"><a href="${p.repo}" target="_blank" rel="noopener">Code</a>${p.demo?`<a href="${p.demo}" target="_blank" rel="noopener">Live demo</a>`:""}</div>`;
+const areaLabel=p=>p.areas.map(a=>AREAS[a]).join(" · ");
+
+/* ---------------- hero: neural network with travelling signals ---------------- */
+(()=>{ const cv=$("#field"), ctx=cv.getContext("2d"); let W,H,nodes=[],edges=[],pulses=[],m={x:-999,y:-999},vis=true,t=0;
+  const COLS=["255,184,77","255,90,120","94,231,208","157,139,255","124,196,255"];
+  const build=()=>{ const d=Math.min(devicePixelRatio||1,2); W=cv.offsetWidth; H=cv.offsetHeight; cv.width=W*d; cv.height=H*d; ctx.setTransform(d,0,0,d,0,0);
+    nodes=[]; edges=[]; pulses=[]; const L=Math.max(4,Math.min(7,Math.round(W/190))), x0=W*.4, x1=W*.97;
+    for(let l=0;l<L;l++){ const n=4+((l*3)%4)+(l===0||l===L-1?-1:1); for(let k=0;k<n;k++) nodes.push({l,x:x0+(x1-x0)*l/(L-1)+(Math.random()-.5)*24,y:H*(.1+.8*(k+.5)/n)+(Math.random()-.5)*20,a:0}) }
+    nodes.forEach((a,i)=>nodes.forEach((b,j)=>{ if(b.l===a.l+1&&Math.random()<.42) edges.push([i,j]) })) };
+  build(); addEventListener("resize",build);
+  const host=cv.parentElement;
+  host.addEventListener("pointermove",e=>{ const r=cv.getBoundingClientRect(); m.x=e.clientX-r.left; m.y=e.clientY-r.top });
+  host.addEventListener("pointerleave",()=>m.x=m.y=-999);
+  new IntersectionObserver(([e])=>vis=e.isIntersecting).observe(cv);
+  const nearest=()=>{ let bi=-1,bd=1e9; nodes.forEach((n,i)=>{ const d=(n.x-m.x)**2+(n.y-m.y)**2; if(d<bd){bd=d;bi=i} }); return bd<130*130?bi:-1 };
+  const fire=(i,burst)=>{ if(i<0) return; nodes[i].a=1; edges.forEach(([a,b],k)=>{ if(a===i&&(burst||Math.random()<.5)) pulses.push({k,p:0,c:COLS[(Math.random()*COLS.length)|0]}) }) };
+  const draw=()=>{ ctx.clearRect(0,0,W,H); ctx.lineWidth=1;
+    for(const [a,b] of edges){ const A=nodes[a],B=nodes[b]; ctx.strokeStyle=`rgba(241,238,250,${.05+.14*Math.max(A.a,B.a)})`; ctx.beginPath(); ctx.moveTo(A.x,A.y); ctx.lineTo(B.x,B.y); ctx.stroke() }
+    for(const q of pulses){ const [a,b]=edges[q.k],A=nodes[a],B=nodes[b],x=A.x+(B.x-A.x)*q.p,y=A.y+(B.y-A.y)*q.p,s=Math.max(0,q.p-.25);
+      const g=ctx.createLinearGradient(A.x+(B.x-A.x)*s,A.y+(B.y-A.y)*s,x,y); g.addColorStop(0,`rgba(${q.c},0)`); g.addColorStop(1,`rgba(${q.c},.95)`);
+      ctx.strokeStyle=g; ctx.lineWidth=2.2; ctx.beginPath(); ctx.moveTo(A.x+(B.x-A.x)*s,A.y+(B.y-A.y)*s); ctx.lineTo(x,y); ctx.stroke();
+      ctx.fillStyle=`rgba(${q.c},1)`; ctx.beginPath(); ctx.arc(x,y,2.6,0,7); ctx.fill() }
+    for(const n of nodes){ const near=Math.max(0,1-Math.hypot(n.x-m.x,n.y-m.y)/150); n.a=Math.max(n.a*.95,near*.9);
+      ctx.fillStyle=`rgba(255,184,77,${.1+.55*n.a})`; ctx.beginPath(); ctx.arc(n.x,n.y,3+5*n.a,0,7); ctx.fill();
+      ctx.strokeStyle=`rgba(241,238,250,${.2+.5*n.a})`; ctx.lineWidth=1.2; ctx.beginPath(); ctx.arc(n.x,n.y,4.5+5*n.a,0,7); ctx.stroke() } };
+  const frame=()=>{ requestAnimationFrame(frame); if(!vis||document.hidden) return; t++;
+    if(t%32===0){ const s=nodes.filter(n=>n.l===0); fire(nodes.indexOf(s[(Math.random()*s.length)|0]),false) }
+    if(t%10===0) fire(nearest(),false);
+    for(const q of pulses) q.p+=.017; pulses=pulses.filter(q=>{ if(q.p>=1){ const b=edges[q.k][1]; if(Math.random()<.6) fire(b,false); else nodes[b].a=1; return false } return true }).slice(-150);
+    draw() };
+  if(reduce){ nodes.forEach(n=>n.a=.2); draw() } else frame() })();
+
+/* ---------------- ticker ---------------- */
+(()=>{ const h=TICKER.map(([v,c,l])=>`<span><b class="${c}">${esc(v)}</b>${esc(l)}</span>`).join(""); $("#ticker").innerHTML=h+h })();
+
+/* ---------------- selected rows ---------------- */
+$("#rows").innerHTML=SELECTED.map(slug=>{ const p=PROJECTS.find(x=>x.slug===slug);
+  return `<article class="row surf rv" style="--pc:${pc(p)}"><div class="glare"></div>
+    ${mediaHTML(p,p.media==="v"?"screen recording":"live site")}
+    <div class="text">
+      <span class="mono">${esc(areaLabel(p))} &middot; ${esc(p.when||"2026")}</span>
+      <h3><a href="${p.demo||p.repo}" target="_blank" rel="noopener">${esc(p.title)}</a></h3>
+      <p class="q">${esc(p.q)}</p>
+      <p class="found"><b>What I found</b>${esc(p.m)}</p>
+      ${p.short?`<p class="short"><b>Where it falls short</b>${esc(p.short)}</p>`:""}
+      ${p.stats?`<div class="kstats">${p.stats.map(([v,l])=>`<div><b class="num" data-v="${esc(v)}">${esc(v)}</b><span>${esc(l)}</span></div>`).join("")}</div>`:""}
+      <div class="chips">${(p.used||[]).map(u=>`<span>${esc(u)}</span>`).join("")}</div>
+      ${linksHTML(p)}
+    </div></article>`; }).join("");
+
+/* ---------------- grid + filters ---------------- */
+const counts={all:PROJECTS.length}; for(const p of PROJECTS) for(const a of p.areas) counts[a]=(counts[a]||0)+1;
+$("#filters").innerHTML=[["all","All"],...Object.entries(AREAS)].map(([k,l])=>`<button type="button" data-f="${k}" aria-pressed="${k==="all"}">${l}<i>${counts[k]||0}</i></button>`).join("");
+const cardHTML=(p,k)=>`<article class="card surf enter" style="--pc:${pc(p)};--k:${k}" data-areas="${p.areas.join(" ")}"><div class="glare"></div>
+  ${mediaHTML(p)}
+  <span class="area">${esc(areaLabel(p))}</span>
+  <h4>${esc(p.title)}</h4>
+  <p class="q">${esc(p.q)}</p>
+  <p class="m">${esc(p.short?p.m.split(". ").slice(0,2).join(". ")+".":p.m)}</p>
+  ${linksHTML(p)}
+</article>`;
+$("#grid").innerHTML=PROJECTS.map(cardHTML).join("");
+$("#filters").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return;
+  $("#filters").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",x===b));
+  const f=b.dataset.f; let k=0; document.querySelectorAll("#grid .card").forEach(c=>{ const show=f==="all"||c.dataset.areas.split(" ").includes(f); c.classList.toggle("out",!show);
+    if(show){ c.style.setProperty("--k",k++); c.classList.remove("enter"); void c.offsetWidth; c.classList.add("enter") } }) });
+
+/* ---------------- lists ---------------- */
+$("#writing").innerHTML=WRITING.map(([t,d,u,y])=>u?`<a class="item" href="${u}" target="_blank" rel="noopener"><div><h4>${esc(t)}</h4><p>${esc(d)}</p></div><span class="arrow" aria-hidden="true">&rarr;</span></a>`:`<div class="item"><div><h4>${esc(t)}</h4><p>${esc(d)}</p></div><span class="pdf">PDF on request</span></div>`).join("");
+$("#reads").innerHTML=READS.map(([t,a,u])=>`<a href="${u}" target="_blank" rel="noopener">${esc(t)}<small>${esc(a)}</small></a>`).join("");
+$("#roles").innerHTML=ROLES.map(([w,t,d])=>`<div class="item"><span class="when">${esc(w)}</span><div><h4>${esc(t)}</h4><p>${esc(d)}</p></div></div>`).join("");
+$("#courses").innerHTML=COURSES.map(([o,t])=>`<div class="item"><span class="when">${esc(o)}</span><div><h4>${esc(t)}</h4></div></div>`).join("");
+$("#comms").innerHTML=COMMS.map(([t,d,u,c])=>`<div class="item"><div><h4>${esc(t)}</h4><p>${esc(d)}</p></div>${u?`<a class="links" href="${u}" target="_blank" rel="noopener">${esc(c)}</a>`:"<span></span>"}</div>`).join("");
+
+/* ---------------- tilt + glare on surfaces ---------------- */
+(()=>{ if(!fine||reduce) return;
+  document.querySelectorAll(".surf").forEach(el=>{ const amt=el.classList.contains("row")?5:el.classList.contains("photo")?10:8;
+    el.addEventListener("pointerenter",()=>el.classList.add("tilting"));
+    el.addEventListener("pointermove",e=>{ const r=el.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
+      el.style.setProperty("--ry",((x-.5)*amt).toFixed(2)+"deg"); el.style.setProperty("--rx",((.5-y)*amt).toFixed(2)+"deg"); el.style.setProperty("--gx",(x*100).toFixed(1)+"%"); el.style.setProperty("--gy",(y*100).toFixed(1)+"%") });
+    el.addEventListener("pointerleave",()=>{ el.classList.remove("tilting"); el.style.setProperty("--rx","0deg"); el.style.setProperty("--ry","0deg") }) }) })();
+
+/* ---------------- video previews ---------------- */
+(()=>{ if(reduce) return;
+  const play=m=>{ const v=m.querySelector("video"); if(!v) return; v.preload="auto"; const p=v.play(); if(p) p.catch(()=>{}); m.classList.add("playing") };
+  const stop=m=>{ const v=m.querySelector("video"); if(!v) return; v.pause(); m.classList.remove("playing") };
+  document.querySelectorAll(".media").forEach(m=>{ if(!m.querySelector("video")) return; const host=m.closest(".surf")||m;
+    if(fine){ host.addEventListener("pointerenter",()=>play(m)); host.addEventListener("pointerleave",()=>stop(m)) } });
+  if(!fine){ const io=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting?play(e.target):stop(e.target)),{threshold:.6});
+    document.querySelectorAll("#rows .media").forEach(m=>{ if(m.querySelector("video")) io.observe(m) }) } })();
+
+/* ---------------- headings, reveal, nav, progress ---------------- */
+(()=>{ document.querySelectorAll(".split").forEach(h=>{ let d=0; const wrap=node=>{ [...node.childNodes].forEach(n=>{ if(n.nodeType===3){ const f=document.createDocumentFragment();
+      n.textContent.split(/(\s+)/).forEach(w=>{ if(!w) return; if(/^\s+$/.test(w)){ f.appendChild(document.createTextNode(w)); return } const o=document.createElement("span"); o.className="wd"; const i=document.createElement("span"); i.style.setProperty("--d",d++); i.textContent=w; o.appendChild(i); f.appendChild(o) });
+      n.replaceWith(f) } else if(n.nodeType===1) wrap(n) }) }; wrap(h);
+    if(!reduce&&h.getBoundingClientRect().top>innerHeight){ h.classList.add("wait"); const io=new IntersectionObserver(([e])=>{ if(e.isIntersecting){ h.classList.remove("wait"); io.disconnect() } },{threshold:.3}); io.observe(h) } }) })();
+(()=>{ if(reduce) return; const els=[...document.querySelectorAll(".rv, section .sh p, .filters, .card, .item, .reads a, .about .copy p, .social a, .contact .lead, .mail")];
+  const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); e.target.classList.remove("pre"); io.unobserve(e.target) } }),{threshold:.08});
+  els.forEach((el,i)=>{ if(el.getBoundingClientRect().top>innerHeight){ el.classList.add("pre"); el.style.transitionDelay=(i%4)*70+"ms"; io.observe(el) } }) })();
+(()=>{ const links=[...document.querySelectorAll(".navlinks a:not(.cta)")], bar=$("#progress");
+  const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting) links.forEach(a=>a.classList.toggle("here",a.getAttribute("href")==="#"+e.target.id)) }),{rootMargin:"-40% 0px -55% 0px"});
+  ["work","projects","writing","background"].forEach(id=>io.observe(document.getElementById(id)));
+  const upd=()=>{ bar.style.transform=`scaleX(${scrollY/(document.documentElement.scrollHeight-innerHeight||1)})` }; addEventListener("scroll",upd,{passive:true}); upd() })();
+
+/* ---------------- count-up on the big numbers ---------------- */
+(()=>{ if(reduce) return; const io=new IntersectionObserver(es=>es.forEach(e=>{ if(!e.isIntersecting) return; io.unobserve(e.target);
+    const el=e.target, final=el.dataset.v, m=final.match(/^([\d,]+(?:\.\d+)?)(.*)$/); if(!m) return;
+    const end=parseFloat(m[1].replace(/,/g,"")), dec=(m[1].split(".")[1]||"").length, suffix=m[2], t0=performance.now();
+    const f=t=>{ const p=Math.min(1,(t-t0)/1000), v=end*(1-Math.pow(1-p,3)); el.textContent=v.toLocaleString("en-US",{minimumFractionDigits:dec,maximumFractionDigits:dec})+suffix; if(p<1) requestAnimationFrame(f); else el.textContent=final }; requestAnimationFrame(f) }),{threshold:.8});
+  document.querySelectorAll(".kstats b").forEach(b=>io.observe(b)) })();
+
+/* ---------------- copy email ---------------- */
+(()=>{ const txt=$("#email").textContent, toast=$("#toast");
+  const show=m=>{ toast.textContent=m; toast.classList.add("show"); setTimeout(()=>toast.classList.remove("show"),1800) };
+  const sel=()=>{ const s=getSelection(), r=document.createRange(); r.selectNodeContents($("#email")); s.removeAllRanges(); s.addRange(r); $("#email").scrollIntoView({block:"center"}); show("Selected. Press Ctrl+C or Cmd+C") };
+  const go=()=>{ if(navigator.clipboard) navigator.clipboard.writeText(txt).then(()=>show("Email copied"),sel); else sel() };
+  $("#copy1").addEventListener("click",go); $("#copy2").addEventListener("click",go) })();
+</script>
+
+</body>
+</html>

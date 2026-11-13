@@ -301,7 +301,7 @@ footer{position:relative;z-index:1;padding-block:26px 40px;border-top:1px solid 
   <div class="two">
     <div>
       <div class="sh" style="margin-bottom:10px"><h2 class="split">Writing</h2></div>
-      <div class="list" id="writing"></div>
+      <div class="list" id="writingList"></div>
     </div>
     <div>
       <div class="sh" style="margin-bottom:10px"><h2 class="split">Reading <em>that shaped this</em></h2></div>
@@ -537,7 +537,7 @@ $("#filters").addEventListener("click",e=>{ const b=e.target.closest("button"); 
     if(show){ c.style.setProperty("--k",k++); c.classList.remove("enter"); void c.offsetWidth; c.classList.add("enter") } }) });
 
 /* ---------------- lists ---------------- */
-$("#writing").innerHTML=WRITING.map(([t,d,u,y])=>u?`<a class="item" href="${u}" target="_blank" rel="noopener"><div><h4>${esc(t)}</h4><p>${esc(d)}</p></div><span class="arrow" aria-hidden="true">&rarr;</span></a>`:`<div class="item"><div><h4>${esc(t)}</h4><p>${esc(d)}</p></div><span class="pdf">PDF on request</span></div>`).join("");
+$("#writingList").innerHTML=WRITING.map(([t,d,u,y])=>u?`<a class="item" href="${u}" target="_blank" rel="noopener"><div><h4>${esc(t)}</h4><p>${esc(d)}</p></div><span class="arrow" aria-hidden="true">&rarr;</span></a>`:`<div class="item"><div><h4>${esc(t)}</h4><p>${esc(d)}</p></div><span class="pdf">PDF on request</span></div>`).join("");
 $("#reads").innerHTML=READS.map(([t,a,u])=>`<a href="${u}" target="_blank" rel="noopener">${esc(t)}<small>${esc(a)}</small></a>`).join("");
 $("#roles").innerHTML=ROLES.map(([w,t,d])=>`<div class="item"><span class="when">${esc(w)}</span><div><h4>${esc(t)}</h4><p>${esc(d)}</p></div></div>`).join("");
 $("#courses").innerHTML=COURSES.map(([o,t])=>`<div class="item"><span class="when">${esc(o)}</span><div><h4>${esc(t)}</h4></div></div>`).join("");
